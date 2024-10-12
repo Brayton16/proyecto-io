@@ -1,6 +1,6 @@
 import React from "react";
 
-const proyecto_4  = ( ) => {
+const Proyecto1  = ( ) => {
     return(
         <div>
             Hola Mundo!
@@ -8,4 +8,4 @@ const proyecto_4  = ( ) => {
     )
 }
 
-export default proyecto_4;
+export default Proyecto1;
