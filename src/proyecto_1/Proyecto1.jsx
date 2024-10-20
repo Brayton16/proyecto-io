@@ -2,29 +2,43 @@ import React from "react";
 import { useState } from "react";
 import { ToastContainer, toast } from 'react-toastify'
 
+
 const Proyecto1 = () => {
     const [size, setSize] = useState(4); // Tamaño inicial de la matriz
+    const [iteracion, setIteracion] = useState(0); // Tamaño inicial de la matriz
     const [initialMatrix, setInitialMatrix] = useState(
         Array(size).fill(null).map(() => Array(size).fill(''))
-    );
+      );
+    const [matrix, setMatrix] = useState([])
+    const [currentMatrix, setCurrentMatrix] = useState(initialMatrix)
+
     const [initialMatrixP, setInitialMatrixP] = useState(
         Array(size).fill(null).map(() => Array(size).fill(0))
     );
-    const [matrixP, setMatrixP] = useState(initialMatrix)
-    const [error, setError] = useState(false)
+    const [matrixP, setMatrixP] = useState([])
+    const [currentMatrixP, setCurrentMatrixP] = useState(initialMatrixP)
+
+    var [error, setError] = useState(false)
+    const [loading, setLoading] = useState(false)
     // Manejar cambios en los inputs de la matriz inicial
     const handleInputChange = (rowIndex, colIndex, event) => {
         const newMatrix = [...initialMatrix];
+        const newMatrixP = [...initialMatrixP];
         newMatrix[rowIndex][colIndex] = event.target.value; // Actualiza el valor en la matriz
         setInitialMatrix(newMatrix);
+        setInitialMatrixP(newMatrixP);
+        setCurrentMatrix(newMatrix);
+        setCurrentMatrixP(newMatrixP);
     };
 
     // Agregar una columna
     const addColumn = () => {
         const newSize = size + 1;
         const newMatrix = Array(newSize).fill(null).map(() => Array(newSize).fill('')); // Agrega una nueva columna
+        const newMatrixP = Array(newSize).fill(null).map(() => Array(newSize).fill(0)); // Agrega una nueva columna
         setInitialMatrix(newMatrix);
-        setSize(newSize); // Incrementa el tamaño
+        setInitialMatrixP(newMatrixP)
+        setSize(newSize); 
     };
 
     // Quitar la última columna
@@ -33,57 +47,66 @@ const Proyecto1 = () => {
         if (newSize > 1) {
             const newMatrix = Array(newSize).fill(null).map(() => Array(newSize).fill('')); // Agrega una nueva columna
             setInitialMatrix(newMatrix);
-            setSize(newSize); // Incrementa el tamaño
+            setSize(newSize); 
         }
     };
-
-    const Floyd = (k) => {
-        for(let i = 0; i < size; i++){
-          for(let j = 0; j < size; j++){
-            if(error === false){
-              console.log(initialMatrix[i][j])
-              if(initialMatrix[i][j] !== ""){
-                if(initialMatrix[i][j] === "INF" || initialMatrix[i][j] === "∞"){
-                  if(initialMatrix[i][k] !== "INF" && initialMatrix[i][k] !== "∞" && initialMatrix[k][j] !== "INF" && initialMatrix[k][j] !== "∞"){
-                    initialMatrix[i][j] = parseInt(initialMatrix[i][k]) + parseInt(initialMatrix[k][j])
-                  }
-                }else if(initialMatrix[i][j] >= 0){
-                  if(initialMatrix[i][j] > initialMatrix[i][k] + initialMatrix[k][j]){
-                    initialMatrix[i][j] = parseInt(initialMatrix[i][k]) + parseInt(initialMatrix[k][j])
-                  }
-                }else{
-                  setError(true)
-                  i = size
-                  j = size
-                }  
-              }else{
-                setError(true)
-                i = size
-                j = size
+    
+    const floyd = () => {
+      let k = iteracion
+      console.log(k)
+      const newMatrix = Array.from(currentMatrix, row => Array.from(row));
+      const newMatrixP = Array.from(currentMatrixP, row => Array.from(row));
+      for(let i = 0; i < size; i++){
+        for(let j = 0; j < size; j++){
+          if(newMatrix[i][j] !== ""){
+            if(newMatrix[i][j] === "INF" || newMatrix[i][j] === "∞"){
+              if(newMatrix[i][k] !== "INF" && newMatrix[i][k] !== "∞" && newMatrix[k][j] !== "INF" && newMatrix[k][j] !== "∞"){
+                newMatrix[i][j] = parseInt(newMatrix[i][k]) + parseInt(newMatrix[k][j])
+                newMatrixP[i][j] = k + 1
               }
-            }
+            }else if(newMatrix[i][j] >= 0){
+              if(parseInt(newMatrix[i][j]) > parseInt(newMatrix[i][k]) + parseInt(newMatrix[k][j])){
+                newMatrix[i][j] = parseInt(newMatrix[i][k]) + parseInt(newMatrix[k][j])
+                newMatrixP[i][j] = k + 1
+              }
+            }else{
+              setError(true)
+              i = size
+              j = size
+            }  
           }
         }
-    }
-    const comenzarAlgoritmo = () => {
-        for(let i = 0; i < size; i++){
-          if(error === false){
-            Floyd(i)
-          }else{
-            i = size
-            toast.error("Error al ingresar los datos, por favor intente de nuevo.")
-          }  
+      setMatrix([...matrix, newMatrix])
+      setCurrentMatrix(newMatrix)
+      setMatrixP([...matrixP, newMatrixP])
+      setCurrentMatrixP(newMatrixP)
+      }
+    } 
+    const iniciar = () =>{
+      try{
+        if(iteracion < size){
+          const D = [...currentMatrix]
+          setMatrix([...matrix, D])
+          const P = [...currentMatrixP]
+          setMatrix([...matrixP, P])
+          setLoading(true)
+          floyd()
+          setIteracion(iteracion + 1)
+        }else{
+          toast.success("Terminó el algoritmo")
         }
-    }
-    const verDatos = () => {
-        setError(false)
-        comenzarAlgoritmo();
+      }
+      catch{
+        setError(true)
+        toast.error("Error al ingresar los datos, por favor intente de nuevo.")
+         
+      }
     }
 
     return(
         <div className="container mt-5">
           <ToastContainer />
-          <h2 className="text-center">Matriz para el Algoritmo de Floyd-Warshall</h2>
+          <h2 className="text-center">Matriz para el Algoritmo de Floyd</h2>
 
           {/* Tabla de distancias iniciales */}
           <table className="table table-bordered text-center">
@@ -120,12 +143,78 @@ const Proyecto1 = () => {
           <div className="mb-3">
             <button className="btn btn-success" onClick={addColumn}>Agregar Columna</button>
             <button className="btn btn-danger ms-2" onClick={removeColumn}>Quitar Columna</button>
+            <button type="submit" className="btn btn-primary ms-3" onClick={iniciar}>Iniciar Algoritmo</button>
+            <button onClick={() => window.location.reload()} className="btn btn-warning ms-3">Reiniciar</button>
           </div>
-
-          {/* Botón para iniciar el algoritmo (sin lógica aún) */}
-          <button type="submit" className="btn btn-primary my-3" onClick={verDatos}>Iniciar Algoritmo</button>
+          <div className="row">
+            <div className="col">
+          {loading ? (
+            matrix.map((matriz, matrixIndex) => (
+              <div key={matrixIndex} className="mb-4">
+                <h2>D({matrixIndex + 1})</h2>
+                <table className="table table-striped table-bordered text-center">
+                  <thead>
+                    <tr>
+                      <th></th> {/* Columna para los índices de las filas */}
+                      {matriz[0] && matriz[0].map((_, colIndex) => (
+                        <th key={colIndex}>N{colIndex + 1}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {matriz.map((row, rowIndex) => (
+                      <tr key={rowIndex}>
+                        <th className="table-dark">N{rowIndex + 1}</th>
+                        {row.map((cell, colIndex) => (
+                          <td key={colIndex}>{cell}</td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ))
+          ) : (
+            <p>Cargando matrices D...</p>
+          )}
+          </div>
+          <div className="col">
+          {loading ? (
+            matrixP.map((matriz, matrixIndex) => (
+              <div key={matrixIndex} className="mb-4">
+                <h2>P({matrixIndex + 1})</h2>
+                <table className="table table-striped table-bordered text-center">
+                  <thead>
+                    <tr>
+                      <th></th> {/* Columna para los índices de las filas */}
+                      {matriz[0] && matriz[0].map((_, colIndex) => (
+                        <th key={colIndex}>N{colIndex + 1}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {matriz.map((row, rowIndex) => (
+                      <tr key={rowIndex}>
+                        <th className="table-dark">N{rowIndex + 1}</th>
+                        {row.map((cell, colIndex) => (
+                          <td key={colIndex}>{cell}</td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                
+              </div>
+            ))
+          ) : (
+            <p>Cargando matrices P...</p>
+          )}
+          </div>
+          <button type="submit" className="btn btn-dark ms-3 mb-5" onClick={iniciar}>Siguiente paso</button>
+        </div>
         </div>
     )
 }
+
 
 export default Proyecto1;
