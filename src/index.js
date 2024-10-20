@@ -9,7 +9,7 @@ import Proyecto1 from './proyecto_1/Proyecto1';
 import Proyecto2 from './proyecto_2/Proyecto2';
 import Proyecto3 from './proyecto_3/Proyecto3';
 import Proyecto4 from './proyecto_4/Proyecto4';
-
+import "react-toastify/dist/ReactToastify.css";
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
