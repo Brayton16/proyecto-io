@@ -4,8 +4,8 @@ import { ToastContainer, toast } from 'react-toastify'
 
 
 const Proyecto1 = () => {
-    const [size, setSize] = useState(4); // Tamaño inicial de la matriz
-    const [iteracion, setIteracion] = useState(0); // Tamaño inicial de la matriz
+    const [size, setSize] = useState(4); 
+    const [iteracion, setIteracion] = useState(0); 
     const [initialMatrix, setInitialMatrix] = useState(
         Array(size).fill(null).map(() => Array(size).fill(''))
       );
@@ -18,34 +18,33 @@ const Proyecto1 = () => {
     const [matrixP, setMatrixP] = useState([])
     const [currentMatrixP, setCurrentMatrixP] = useState(initialMatrixP)
 
-    var [error, setError] = useState(false)
     const [loading, setLoading] = useState(false)
-    // Manejar cambios en los inputs de la matriz inicial
+
     const handleInputChange = (rowIndex, colIndex, event) => {
         const newMatrix = [...initialMatrix];
         const newMatrixP = [...initialMatrixP];
-        newMatrix[rowIndex][colIndex] = event.target.value; // Actualiza el valor en la matriz
+        newMatrix[rowIndex][colIndex] = event.target.value; 
         setInitialMatrix(newMatrix);
         setInitialMatrixP(newMatrixP);
         setCurrentMatrix(newMatrix);
         setCurrentMatrixP(newMatrixP);
     };
 
-    // Agregar una columna
+    //TODO: Algoritmo para encontrar ruta específica | sistema de guardado de ejercicios (maybe usar json o localStorage)
+
     const addColumn = () => {
         const newSize = size + 1;
-        const newMatrix = Array(newSize).fill(null).map(() => Array(newSize).fill('')); // Agrega una nueva columna
-        const newMatrixP = Array(newSize).fill(null).map(() => Array(newSize).fill(0)); // Agrega una nueva columna
+        const newMatrix = Array(newSize).fill(null).map(() => Array(newSize).fill('')); 
+        const newMatrixP = Array(newSize).fill(null).map(() => Array(newSize).fill(0)); 
         setInitialMatrix(newMatrix);
         setInitialMatrixP(newMatrixP)
         setSize(newSize); 
     };
 
-    // Quitar la última columna
     const removeColumn = () => {
         const newSize = size - 1;
         if (newSize > 1) {
-            const newMatrix = Array(newSize).fill(null).map(() => Array(newSize).fill('')); // Agrega una nueva columna
+            const newMatrix = Array(newSize).fill(null).map(() => Array(newSize).fill(''));
             setInitialMatrix(newMatrix);
             setSize(newSize); 
         }
@@ -70,7 +69,6 @@ const Proyecto1 = () => {
                 newMatrixP[i][j] = k + 1
               }
             }else{
-              setError(true)
               i = size
               j = size
             }  
@@ -97,9 +95,7 @@ const Proyecto1 = () => {
         }
       }
       catch{
-        setError(true)
-        toast.error("Error al ingresar los datos, por favor intente de nuevo.")
-         
+        toast.error("Error al ingresar los datos, por favor intente de nuevo.")   
       }
     }
 
@@ -107,8 +103,6 @@ const Proyecto1 = () => {
         <div className="container mt-5">
           <ToastContainer />
           <h2 className="text-center">Matriz para el Algoritmo de Floyd</h2>
-
-          {/* Tabla de distancias iniciales */}
           <table className="table table-bordered text-center">
             <thead className="table-dark">
               <tr>
@@ -125,7 +119,7 @@ const Proyecto1 = () => {
                   {row.map((cell, colIndex) => (
                     <td key={colIndex}>
                       <input
-                        type="text" // Cambiado a 'text' para aceptar texto
+                        type="text" 
                         className="form-control"
                         value={cell}
                         onChange={(event) => handleInputChange(rowIndex, colIndex, event)}
@@ -138,8 +132,6 @@ const Proyecto1 = () => {
               ))}
             </tbody>
           </table>
-
-          {/* Botones para agregar y quitar columnas */}
           <div className="mb-3">
             <button className="btn btn-success" onClick={addColumn}>Agregar Columna</button>
             <button className="btn btn-danger ms-2" onClick={removeColumn}>Quitar Columna</button>
@@ -148,70 +140,70 @@ const Proyecto1 = () => {
           </div>
           <div className="row">
             <div className="col">
-          {loading ? (
-            matrix.map((matriz, matrixIndex) => (
-              <div key={matrixIndex} className="mb-4">
-                <h2>D({matrixIndex + 1})</h2>
-                <table className="table table-striped table-bordered text-center">
-                  <thead>
-                    <tr>
-                      <th></th> {/* Columna para los índices de las filas */}
-                      {matriz[0] && matriz[0].map((_, colIndex) => (
-                        <th key={colIndex}>N{colIndex + 1}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {matriz.map((row, rowIndex) => (
-                      <tr key={rowIndex}>
-                        <th className="table-dark">N{rowIndex + 1}</th>
-                        {row.map((cell, colIndex) => (
-                          <td key={colIndex}>{cell}</td>
+              {loading ? (
+                matrix.map((matriz, matrixIndex) => (
+                  <div key={matrixIndex} className="mb-4">
+                    <h2>D({matrixIndex + 1})</h2>
+                    <table className="table table-striped table-bordered text-center">
+                      <thead>
+                        <tr>
+                          <th></th> 
+                          {matriz[0] && matriz[0].map((_, colIndex) => (
+                            <th key={colIndex}>N{colIndex + 1}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {matriz.map((row, rowIndex) => (
+                          <tr key={rowIndex}>
+                            <th className="table-dark">N{rowIndex + 1}</th>
+                            {row.map((cell, colIndex) => (
+                              <td key={colIndex}>{cell}</td>
+                            ))}
+                          </tr>
                         ))}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ))
-          ) : (
-            <p>Cargando matrices D...</p>
-          )}
-          </div>
-          <div className="col">
-          {loading ? (
-            matrixP.map((matriz, matrixIndex) => (
-              <div key={matrixIndex} className="mb-4">
-                <h2>P({matrixIndex + 1})</h2>
-                <table className="table table-striped table-bordered text-center">
-                  <thead>
-                    <tr>
-                      <th></th> {/* Columna para los índices de las filas */}
-                      {matriz[0] && matriz[0].map((_, colIndex) => (
-                        <th key={colIndex}>N{colIndex + 1}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {matriz.map((row, rowIndex) => (
-                      <tr key={rowIndex}>
-                        <th className="table-dark">N{rowIndex + 1}</th>
-                        {row.map((cell, colIndex) => (
-                          <td key={colIndex}>{cell}</td>
+                      </tbody>
+                    </table>
+                  </div>
+                ))
+              ) : (
+                <p>Cargando matrices D...</p>
+              )}
+            </div>
+            <div className="col">
+              {loading ? (
+                matrixP.map((matriz, matrixIndex) => (
+                  <div key={matrixIndex} className="mb-4">
+                    <h2>P({matrixIndex + 1})</h2>
+                    <table className="table table-striped table-bordered text-center">
+                      <thead>
+                        <tr>
+                          <th></th> 
+                          {matriz[0] && matriz[0].map((_, colIndex) => (
+                            <th key={colIndex}>N{colIndex + 1}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {matriz.map((row, rowIndex) => (
+                          <tr key={rowIndex}>
+                            <th className="table-dark">N{rowIndex + 1}</th>
+                            {row.map((cell, colIndex) => (
+                              <td key={colIndex}>{cell}</td>
+                            ))}
+                          </tr>
                         ))}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                
-              </div>
-            ))
-          ) : (
-            <p>Cargando matrices P...</p>
-          )}
+                      </tbody>
+                    </table>
+                    
+                  </div>
+                ))
+              ) : (
+                <p>Cargando matrices P...</p>
+              )}
+            </div>
+            <button type="submit" className="btn btn-dark ms-3 mb-5" onClick={iniciar}>Siguiente paso</button>
           </div>
-          <button type="submit" className="btn btn-dark ms-3 mb-5" onClick={iniciar}>Siguiente paso</button>
-        </div>
         </div>
     )
 }
