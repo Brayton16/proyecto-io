@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { render } from "react-dom";
+
 
 const Proyecto4  = ( ) => {
     const [nodeCount, setNodeCount] = useState(0);
@@ -8,6 +8,7 @@ const Proyecto4  = ( ) => {
     const [probabilities, setProbabilities] = useState([]);
     const [tableA, setTableA] = useState([]);
     const [tableR, setTableR] = useState([]);
+    
 
     // Setea el número de nodos, se asume que siempre n < 10
   const NodeCountChange = (e) => {

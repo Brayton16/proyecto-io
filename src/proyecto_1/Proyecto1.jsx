@@ -6,9 +6,11 @@ import { ToastContainer, toast } from 'react-toastify'
 const Proyecto1 = () => {
     const [size, setSize] = useState(4); 
     const [iteracion, setIteracion] = useState(0); 
+    const [primerNodo, setPrimerNodo] = useState(0); 
+    const [destinoNodo, setDestinoNodo] = useState(''); 
     const [initialMatrix, setInitialMatrix] = useState(
         Array(size).fill(null).map(() => Array(size).fill(''))
-      );
+    );
     const [matrix, setMatrix] = useState([])
     const [currentMatrix, setCurrentMatrix] = useState(initialMatrix)
 
@@ -17,8 +19,10 @@ const Proyecto1 = () => {
     );
     const [matrixP, setMatrixP] = useState([])
     const [currentMatrixP, setCurrentMatrixP] = useState(initialMatrixP)
-
+    const [resultado, setResultado] = useState('')
+    const [terminado, setTerminado] = useState(false)
     const [loading, setLoading] = useState(false)
+    const [error, setError] = useState(false)
 
     const handleInputChange = (rowIndex, colIndex, event) => {
         const newMatrix = [...initialMatrix];
@@ -29,8 +33,58 @@ const Proyecto1 = () => {
         setCurrentMatrix(newMatrix);
         setCurrentMatrixP(newMatrixP);
     };
+    
+    const rutasOptimas = (nodo1, nodo2, listaAux) =>{
+      const matriz = Array.from(currentMatrixP, row => Array.from(row));
+      const largo = Array.from(listaAux).length
+      if(matriz[nodo1][nodo2] === 0){
+        if(currentMatrix[nodo1][nodo2] !== "INF" && currentMatrix[nodo1][nodo2] !== "∞" && currentMatrix[nodo1][nodo2] !== ""){
+          if(listaAux[largo - 1] !== nodo1 + 1){
+            listaAux.push(nodo1 + 1)
+          }
+          listaAux.push(nodo2 + 1)
+        }else{
+          setError(true)
+        }
+      }else{
+        const nodoAux = matriz[nodo1][nodo2] - 1
+        rutasOptimas(nodo1, nodoAux, listaAux)
+        rutasOptimas(nodoAux, nodo2, listaAux)
+      }
+    }
 
-    //TODO: Algoritmo para encontrar ruta específica | sistema de guardado de ejercicios (maybe usar json o localStorage)
+    const handleSubmit = () => {
+      try{
+        const nodo1 = primerNodo.match(/\d+/)[0] - 1
+        const nodo2 = destinoNodo.match(/\d+/)[0] - 1
+        const listaAux = []
+        let sol = ""
+        listaAux.push(nodo1 + 1)
+        rutasOptimas(nodo1, nodo2, listaAux)
+        for(let i = 0; i < listaAux.length; i++){
+          if(i + 1 === listaAux.length){
+            sol += "v"+listaAux[i]  
+          }else{
+            sol += "v"+listaAux[i] + " -> " 
+          }
+        }
+        setResultado(sol)
+        toast.success("Se ha encontrado la solución óptima")
+      }catch{
+        toast.error("Por favor ingrese correctamente ambos nodos que desea encontrar la ruta óptima")
+      }
+    }
+
+    const mostrarRes = () =>{
+      if(!error){
+        setTerminado(true)
+      }else{
+        setTerminado(false)
+        setResultado("")
+      }
+    }
+
+    //TODO: Sistema de guardado de ejercicios (maybe usar json o localStorage)
 
     const addColumn = () => {
         const newSize = size + 1;
@@ -45,14 +99,14 @@ const Proyecto1 = () => {
         const newSize = size - 1;
         if (newSize > 1) {
             const newMatrix = Array(newSize).fill(null).map(() => Array(newSize).fill(''));
+            const newMatrixP = Array(newSize).fill(null).map(() => Array(newSize).fill(0)); 
             setInitialMatrix(newMatrix);
+            setInitialMatrixP(newMatrixP)
             setSize(newSize); 
         }
     };
-    
     const floyd = () => {
       let k = iteracion
-      console.log(k)
       const newMatrix = Array.from(currentMatrix, row => Array.from(row));
       const newMatrixP = Array.from(currentMatrixP, row => Array.from(row));
       for(let i = 0; i < size; i++){
@@ -108,14 +162,14 @@ const Proyecto1 = () => {
               <tr>
                 <th></th>
                 {Array.from({ length: size }).map((_, colIndex) => (
-                  <th key={colIndex}>N{colIndex + 1}</th>
+                  <th key={colIndex}>V{colIndex + 1}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {initialMatrix.map((row, rowIndex) => (
                 <tr key={rowIndex}>
-                  <th className="table-dark">N{rowIndex + 1}</th>
+                  <th className="table-dark">V{rowIndex + 1}</th>
                   {row.map((cell, colIndex) => (
                     <td key={colIndex}>
                       <input
@@ -149,14 +203,14 @@ const Proyecto1 = () => {
                         <tr>
                           <th></th> 
                           {matriz[0] && matriz[0].map((_, colIndex) => (
-                            <th key={colIndex}>N{colIndex + 1}</th>
+                            <th key={colIndex}>V{colIndex + 1}</th>
                           ))}
                         </tr>
                       </thead>
                       <tbody>
                         {matriz.map((row, rowIndex) => (
                           <tr key={rowIndex}>
-                            <th className="table-dark">N{rowIndex + 1}</th>
+                            <th className="table-dark">V{rowIndex + 1}</th>
                             {row.map((cell, colIndex) => (
                               <td key={colIndex}>{cell}</td>
                             ))}
@@ -180,14 +234,14 @@ const Proyecto1 = () => {
                         <tr>
                           <th></th> 
                           {matriz[0] && matriz[0].map((_, colIndex) => (
-                            <th key={colIndex}>N{colIndex + 1}</th>
+                            <th key={colIndex}>V{colIndex + 1}</th>
                           ))}
                         </tr>
                       </thead>
                       <tbody>
                         {matriz.map((row, rowIndex) => (
                           <tr key={rowIndex}>
-                            <th className="table-dark">N{rowIndex + 1}</th>
+                            <th className="table-dark">V{rowIndex + 1}</th>
                             {row.map((cell, colIndex) => (
                               <td key={colIndex}>{cell}</td>
                             ))}
@@ -195,7 +249,6 @@ const Proyecto1 = () => {
                         ))}
                       </tbody>
                     </table>
-                    
                   </div>
                 ))
               ) : (
@@ -203,6 +256,48 @@ const Proyecto1 = () => {
               )}
             </div>
             <button type="submit" className="btn btn-dark ms-3 mb-5" onClick={iniciar}>Siguiente paso</button>
+            { iteracion === size ? (
+              <div className="container mb-5">
+              <h3>Encuentra la ruta más óptima</h3>
+                <div className="mb-3">
+                  <label className="me-2 form-label" htmlFor="startNode">Nodo de inicio: </label>
+                  <input
+                    className="form-control"
+                    type="text"
+                    id="startNode"
+                    placeholder="Digite el nodo 1, ejemplo: v1"
+                    onChange={(e) => setPrimerNodo(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="mb-3">
+                  <label className="me-2 form-label" htmlFor="endNode">Nodo de destino: </label>
+                  <input
+                    className="form-control"
+                    type="text"
+                    id="endNode"
+                    placeholder="Digite el nodo 2, ejemplo: v5"
+                    onChange={(e) => setDestinoNodo(e.target.value)}
+                    required
+                  />
+                </div>
+                <div>
+                  <button onClick={handleSubmit} className="btn btn-success me-2">Calcular Ruta</button>
+                  { !error ? <button onClick={mostrarRes} className="btn btn-success">Mostrar Ruta</button> : toast.error("No existe solución óptima para el par de nodos que seleccionó") && setError(false)}
+                </div>
+                {terminado ? (
+                  <div className="mt-3">
+                    <h4>La solción óptima es: {resultado}</h4>
+                  </div>
+                ) : ( 
+                  <div>
+                    Calculando solución óptima
+                  </div>
+                )}
+            </div>
+            ):(
+              <div>No ha finializado el algorimo</div>
+            )}
           </div>
         </div>
     )
