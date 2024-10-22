@@ -1,28 +1,77 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useState } from "react";
 import { ToastContainer, toast } from 'react-toastify'
 
 
 const Proyecto1 = () => {
     const [size, setSize] = useState(4); 
+    const [id, setId] = useState(0);
+    const [cantidad, setCantidad] = useState(0);
     const [iteracion, setIteracion] = useState(0); 
-    const [primerNodo, setPrimerNodo] = useState(0); 
+    const [primerNodo, setPrimerNodo] = useState(''); 
     const [destinoNodo, setDestinoNodo] = useState(''); 
     const [initialMatrix, setInitialMatrix] = useState(
-        Array(size).fill(null).map(() => Array(size).fill(''))
-    );
-    const [matrix, setMatrix] = useState([])
-    const [currentMatrix, setCurrentMatrix] = useState(initialMatrix)
+      Array(size).fill(null).map((_, rowIndex) => 
+          Array(size).fill('INF').map((cell, colIndex) => 
+              rowIndex === colIndex ? 0 : cell
+          )
+      )
+  );
+    const [matrix, setMatrix] = useState([]);
+    const [currentMatrix, setCurrentMatrix] = useState(initialMatrix);
 
     const [initialMatrixP, setInitialMatrixP] = useState(
         Array(size).fill(null).map(() => Array(size).fill(0))
     );
-    const [matrixP, setMatrixP] = useState([])
-    const [currentMatrixP, setCurrentMatrixP] = useState(initialMatrixP)
-    const [resultado, setResultado] = useState('')
+    const [matrixP, setMatrixP] = useState([]);
+    const [currentMatrixP, setCurrentMatrixP] = useState(initialMatrixP);
+    const [resultado, setResultado] = useState('');
     const [terminado, setTerminado] = useState(false)
-    const [loading, setLoading] = useState(false)
-    const [error, setError] = useState(false)
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(false);
+    const [storedList, setStoredList] = useState([]);
+
+    useEffect(() => {
+      const storedMatrices = localStorage.getItem('matrices');
+      if (storedMatrices) {
+        setStoredList(JSON.parse(storedMatrices));
+        setCantidad(storedMatrices.length);
+      }
+    }, []);
+
+    const loadExercise = (exercise) => {
+      setSize(exercise.size);
+      setId(exercise.id)
+      setInitialMatrix(exercise.initialMatrix);
+      setInitialMatrixP(Array(size).fill(null).map(() => Array(size).fill(0)));
+      setCurrentMatrix(exercise.initialMatrix);
+      setCurrentMatrixP(Array(size).fill(null).map(() => Array(size).fill(0)));
+      setResultado(false)
+      setLoading(false)
+      setError(false)
+      setTerminado(false)
+      setMatrixP([])
+      setMatrix([])
+      setIteracion(0)
+      toast.success('Ejercicio cargado');
+  };
+
+    const clearMatrices = () => {
+      setStoredList([]); // Limpiamos el state
+      localStorage.removeItem('matrices'); // Borramos del localStorage
+    };
+
+    const saveMatrixToLocalStorage = (idNueva) => {
+      const newExercise = {
+          idMatriz: idNueva, 
+          size: size,
+          initialMatrix: initialMatrix,
+      };
+      const updatedStoredList = [...storedList, newExercise];
+      setStoredList(updatedStoredList);
+      localStorage.setItem('matrices', JSON.stringify(updatedStoredList));
+      toast.success('Ejercicio guardado en el historial');
+  };
 
     const handleInputChange = (rowIndex, colIndex, event) => {
         const newMatrix = [...initialMatrix];
@@ -32,6 +81,9 @@ const Proyecto1 = () => {
         setInitialMatrixP(newMatrixP);
         setCurrentMatrix(newMatrix);
         setCurrentMatrixP(newMatrixP);
+        setMatrix([])
+        setMatrixP([])
+        setId(0)
     };
     
     const rutasOptimas = (nodo1, nodo2, listaAux) =>{
@@ -88,7 +140,12 @@ const Proyecto1 = () => {
 
     const addColumn = () => {
         const newSize = size + 1;
-        const newMatrix = Array(newSize).fill(null).map(() => Array(newSize).fill('')); 
+        const newMatrix = 
+          Array(newSize).fill(null).map((_, rowIndex) => 
+              Array(newSize).fill('INF').map((cell, colIndex) => 
+                  rowIndex === colIndex ? 0 : cell
+              )
+          );
         const newMatrixP = Array(newSize).fill(null).map(() => Array(newSize).fill(0)); 
         setInitialMatrix(newMatrix);
         setInitialMatrixP(newMatrixP)
@@ -98,13 +155,19 @@ const Proyecto1 = () => {
     const removeColumn = () => {
         const newSize = size - 1;
         if (newSize > 1) {
-            const newMatrix = Array(newSize).fill(null).map(() => Array(newSize).fill(''));
-            const newMatrixP = Array(newSize).fill(null).map(() => Array(newSize).fill(0)); 
-            setInitialMatrix(newMatrix);
-            setInitialMatrixP(newMatrixP)
-            setSize(newSize); 
+          const newMatrix = 
+          Array(newSize).fill(null).map((_, rowIndex) => 
+              Array(newSize).fill('INF').map((cell, colIndex) => 
+                  rowIndex === colIndex ? 0 : cell
+              )
+          );
+          const newMatrixP = Array(newSize).fill(null).map(() => Array(newSize).fill(0)); 
+          setInitialMatrix(newMatrix);
+          setInitialMatrixP(newMatrixP)
+          setSize(newSize); 
         }
     };
+
     const floyd = () => {
       let k = iteracion
       const newMatrix = Array.from(currentMatrix, row => Array.from(row));
@@ -134,8 +197,31 @@ const Proyecto1 = () => {
       setCurrentMatrixP(newMatrixP)
       }
     } 
+
+    const step = () =>{
+      try{
+        if(iteracion < size){
+          const D = [...currentMatrix]
+          setMatrix([...matrix, D])
+          const P = [...currentMatrixP]
+          setMatrix([...matrixP, P])
+          setLoading(true)
+          floyd()
+          setIteracion(iteracion + 1)
+        }else{
+          toast.success("Terminó el algoritmo")
+        }
+      }
+      catch{
+        toast.error("Error al ingresar los datos, por favor intente de nuevo.")   
+      }
+    }
     const iniciar = () =>{
       try{
+        const count = cantidad
+        if(id === 0){
+          saveMatrixToLocalStorage(count + 1)
+        }
         if(iteracion < size){
           const D = [...currentMatrix]
           setMatrix([...matrix, D])
@@ -157,105 +243,133 @@ const Proyecto1 = () => {
         <div className="container mt-5">
           <ToastContainer />
           <h2 className="text-center">Matriz para el Algoritmo de Floyd</h2>
-          <table className="table table-bordered text-center">
-            <thead className="table-dark">
-              <tr>
-                <th></th>
-                {Array.from({ length: size }).map((_, colIndex) => (
-                  <th key={colIndex}>V{colIndex + 1}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {initialMatrix.map((row, rowIndex) => (
-                <tr key={rowIndex}>
-                  <th className="table-dark">V{rowIndex + 1}</th>
-                  {row.map((cell, colIndex) => (
-                    <td key={colIndex}>
-                      <input
-                        type="text" 
-                        className="form-control"
-                        value={cell}
-                        onChange={(event) => handleInputChange(rowIndex, colIndex, event)}
-                        placeholder="Ingresa un número, 'INF' o '∞'"
-                        required
-                      />
-                    </td>
+          <div className="row">
+            <div className="col-9">
+              <table className="table table-bordered text-center">
+                <thead className="table-dark">
+                  <tr>
+                    <th></th>
+                    {Array.from({ length: size }).map((_, colIndex) => (
+                      <th key={colIndex}>V{colIndex + 1}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {initialMatrix.map((row, rowIndex) => (
+                    <tr key={rowIndex}>
+                      <th className="table-dark">V{rowIndex + 1}</th>
+                      {row.map((cell, colIndex) => (
+                        <td key={colIndex}>
+                          <input
+                            type="text" 
+                            className="form-control"
+                            value={cell}
+                            onChange={(event) => handleInputChange(rowIndex, colIndex, event)}
+                            placeholder="Ingresa un número, 'INF' o '∞'"
+                            required
+                          />
+                        </td>
+                      ))}
+                    </tr>
                   ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                </tbody>
+              </table>
+            </div>
+            {/* Lista de ejercicios guardados */}
+            <div className="col">
+              <h3>Historial de Ejercicios</h3>
+              <div className="list-group">
+                {storedList.length > 0 ? (
+                  storedList.map((exercise, index) => (
+                    <button
+                      key={index}
+                      className="list-group-item list-group-item-action"
+                      onClick={() => loadExercise(exercise)}
+                    >
+                      Ejercicio {index + 1} (Size: {exercise.size})
+                    </button>
+                  ))
+                ) : (
+                  <p>No hay ejercicios guardados</p>
+                )}
+                <button className="btn btn-danger mt-3" onClick={clearMatrices}>Limpiar Historial</button>
+              </div>
+            </div>
+          </div>
           <div className="mb-3">
             <button className="btn btn-success" onClick={addColumn}>Agregar Columna</button>
             <button className="btn btn-danger ms-2" onClick={removeColumn}>Quitar Columna</button>
             <button type="submit" className="btn btn-primary ms-3" onClick={iniciar}>Iniciar Algoritmo</button>
             <button onClick={() => window.location.reload()} className="btn btn-warning ms-3">Reiniciar</button>
           </div>
-          <div className="row">
-            <div className="col">
-              {loading ? (
-                matrix.map((matriz, matrixIndex) => (
-                  <div key={matrixIndex} className="mb-4">
-                    <h2>D({matrixIndex + 1})</h2>
-                    <table className="table table-striped table-bordered text-center">
-                      <thead>
-                        <tr>
-                          <th></th> 
-                          {matriz[0] && matriz[0].map((_, colIndex) => (
-                            <th key={colIndex}>V{colIndex + 1}</th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {matriz.map((row, rowIndex) => (
-                          <tr key={rowIndex}>
-                            <th className="table-dark">V{rowIndex + 1}</th>
-                            {row.map((cell, colIndex) => (
-                              <td key={colIndex}>{cell}</td>
+          <div >
+            { loading ? (
+              <div className="row">
+                <div className="col">
+                  {loading ? (
+                    matrix.map((matriz, matrixIndex) => (
+                      <div key={matrixIndex} className="mb-4">
+                        <h2>D({matrixIndex + 1})</h2>
+                        <table className="table table-striped table-bordered text-center">
+                          <thead>
+                            <tr>
+                              <th></th> 
+                              {matriz[0] && matriz[0].map((_, colIndex) => (
+                                <th key={colIndex}>V{colIndex + 1}</th>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {matriz.map((row, rowIndex) => (
+                              <tr key={rowIndex}>
+                                <th className="table-dark">V{rowIndex + 1}</th>
+                                {row.map((cell, colIndex) => (
+                                  <td key={colIndex}>{cell}</td>
+                                ))}
+                              </tr>
                             ))}
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                ))
-              ) : (
-                <p>Cargando matrices D...</p>
-              )}
-            </div>
-            <div className="col">
-              {loading ? (
-                matrixP.map((matriz, matrixIndex) => (
-                  <div key={matrixIndex} className="mb-4">
-                    <h2>P({matrixIndex + 1})</h2>
-                    <table className="table table-striped table-bordered text-center">
-                      <thead>
-                        <tr>
-                          <th></th> 
-                          {matriz[0] && matriz[0].map((_, colIndex) => (
-                            <th key={colIndex}>V{colIndex + 1}</th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {matriz.map((row, rowIndex) => (
-                          <tr key={rowIndex}>
-                            <th className="table-dark">V{rowIndex + 1}</th>
-                            {row.map((cell, colIndex) => (
-                              <td key={colIndex}>{cell}</td>
+                          </tbody>
+                        </table>
+                      </div>
+                    ))
+                  ) : (
+                    <p>Cargando matrices D...</p>
+                  )}
+                </div>
+                <div className="col">
+                  {loading ? (
+                    matrixP.map((matriz, matrixIndex) => (
+                      <div key={matrixIndex} className="mb-4">
+                        <h2>P({matrixIndex + 1})</h2>
+                        <table className="table table-striped table-bordered text-center">
+                          <thead>
+                            <tr>
+                              <th></th> 
+                              {matriz[0] && matriz[0].map((_, colIndex) => (
+                                <th key={colIndex}>V{colIndex + 1}</th>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {matriz.map((row, rowIndex) => (
+                              <tr key={rowIndex}>
+                                <th className="table-dark">V{rowIndex + 1}</th>
+                                {row.map((cell, colIndex) => (
+                                  <td key={colIndex}>{cell}</td>
+                                ))}
+                              </tr>
                             ))}
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                ))
-              ) : (
-                <p>Cargando matrices P...</p>
-              )}
-            </div>
-            <button type="submit" className="btn btn-dark ms-3 mb-5" onClick={iniciar}>Siguiente paso</button>
+                          </tbody>
+                        </table>
+                      </div>
+                    ))
+                  ) : (
+                    <p>Cargando matrices P...</p>
+                  )}
+                </div>
+                <button type="submit" className="btn btn-dark ms-3 mb-5" onClick={step}>Siguiente paso</button>
+              </div>
+            ) : (<div></div>)}
             { iteracion === size ? (
               <div className="container mb-5">
               <h3>Encuentra la ruta más óptima</h3>
