@@ -286,7 +286,7 @@ const Proyecto1 = () => {
                       className="list-group-item list-group-item-action"
                       onClick={() => loadExercise(exercise)}
                     >
-                      Ejercicio {index + 1} (Size: {exercise.size})
+                      Ejercicio {index + 1} (Size: {exercise.size}, Id: {exercise.idMatriz})
                     </button>
                   ))
                 ) : (
