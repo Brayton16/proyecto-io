@@ -52,9 +52,9 @@ const Proyecto1 = () => {
       const storedMatrices = localStorage.getItem('matrices');
       if (storedMatrices) {
         setStoredList(JSON.parse(storedMatrices));
-        setCantidad(storedMatrices.length);
+        setCantidad(storedList.length)
       }
-    }, []);
+    }, [storedList.length]);
 
     //Función para cargar el ejercicio seleccionado, se reinician las constantes
     const loadExercise = (exercise) => {
@@ -173,7 +173,19 @@ const Proyecto1 = () => {
         const newMatrixP = Array(newSize).fill(null).map(() => Array(newSize).fill(0)); 
         setInitialMatrix(newMatrix);
         setInitialMatrixP(newMatrixP)
+        setCurrentMatrix(newMatrix);
+        setCurrentMatrixP(newMatrixP);
         setSize(newSize); 
+        setMatrix([])
+        setMatrixP([])
+        setId(0)
+        setResultado(false)
+        setLoading(false)
+        setError(false)
+        setTerminado(false)
+        setMatrixP([])
+        setMatrix([])
+        setIteracion(0)
     };
     //Función para quitar celdas a la tabla de la interfaz 
     const removeColumn = () => {
@@ -187,8 +199,20 @@ const Proyecto1 = () => {
           );
           const newMatrixP = Array(newSize).fill(null).map(() => Array(newSize).fill(0)); 
           setInitialMatrix(newMatrix);
-          setInitialMatrixP(newMatrixP)
+          setInitialMatrixP(newMatrixP);
+          setCurrentMatrix(newMatrix);
+          setCurrentMatrixP(newMatrixP);
           setSize(newSize); 
+          setMatrix([])
+          setMatrixP([])
+          setId(0)
+          setResultado(false)
+          setLoading(false)
+          setError(false)
+          setTerminado(false)
+          setMatrixP([])
+          setMatrix([])
+          setIteracion(0)
         }
     };
     //Función para ejecutar el algoritmo de Floyd
@@ -243,9 +267,8 @@ const Proyecto1 = () => {
     //Función para iniciar el algoritmo
     const iniciar = () =>{
       try{
-        const count = cantidad
         if(id === 0){
-          saveMatrixToLocalStorage(count + 1)
+          saveMatrixToLocalStorage(cantidad + 1)
         }
         if(iteracion < size){
           const D = [...currentMatrix]
