@@ -38,7 +38,7 @@ const Proyecto0  = () => {
     return(
         <div className='m-5'>
             <div className='text-center'><h1>Proyecto Investigación de Operaciones</h1></div>
-            <div className='text-center'><h3>Creado por: Brayton Solano, Julián Madrigal, Deylan Sandoval, Álex Brenes</h3></div>
+            <div className='text-center'><h3>Creado por: Brayton Solano, Julián Madrigal, Deylan Sandoval, Alex Brenes</h3></div>
             <div className='text-center m-5'><p>Por favor ingrese a un algorimo para continuar</p></div>
             <div className='d-flex'>
                 <div className='container text-center card-deck'>
