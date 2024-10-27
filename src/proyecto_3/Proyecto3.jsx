@@ -11,10 +11,10 @@
 import React, { useState } from 'react';
 
 function Proyecto3() {
-  const [numGames, setNumGames] = useState(7); // Número máximo de juegos, por defecto 7
+  const [numGames, setNumGames] = useState(7); // maximo de juegos
   const [ph, setPh] = useState(0.5); // Probabilidad del equipo A ganando en casa
   const [pr, setPr] = useState(0.5); // Probabilidad del equipo A ganando de visita
-  const [seriesFormat, setSeriesFormat] = useState(new Array(7).fill('A')); // Por defecto, el equipo A es local en todos los juegos
+  const [seriesFormat, setSeriesFormat] = useState(new Array(7).fill('A')); // aqui el equipo A es local en todos los juegos
 
   const handleNumGamesChange = (e) => {
     const value = Math.min(Math.max(parseInt(e.target.value), 1), 11);
