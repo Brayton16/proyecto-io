@@ -9,6 +9,9 @@ const Proyecto2 = () => {
     const [coordspaso, setCoordspaso] = useState([2,1]);
     const [mayor, setMayor] = useState(0);
     const [mayorStr, setMayorStr] = useState();
+    const [textfomurlainicial,setTextfomurlainicial] = useState();
+    const [textRestricciones,setTextRestricciones] = useState();
+    const [textRespuesta,setTextRespuesta] = useState();
     //const [iteracion, setIteracion] = useState(0); 
    
     const [initialMatrix, setInitialMatrix] = useState(
@@ -138,8 +141,19 @@ const Proyecto2 = () => {
     };
 
     const matrizInicalAlgoritmo = () => {
-
-     
+      var textinicial = "Z = "
+      var textresinicial = ""
+      
+      for (let i = 1; i < initialMatrix.length; i++) {
+        textinicial += ""+ initialMatrix[i][1]+"x"+initialMatrix[i][0]+"+"
+        textresinicial += ""+ initialMatrix[i][2]+"x"+initialMatrix[i][0]+"+"
+      }
+      textresinicial = textresinicial.slice(0, -1)
+      textresinicial += "<="
+      
+      textresinicial += String( mayorStr)
+      setTextfomurlainicial(textinicial.slice(0, -1))
+      setTextRestricciones(textresinicial)
       var newSize = size+1
       const newMatrix = 
           Array(mayor+3).fill(null).map((_, rowIndex) => 
@@ -174,16 +188,50 @@ const Proyecto2 = () => {
         // Por ejemplo, llamar a una función que maneje el dibujo
         //drawMatrix(matrix);
       }
+      
     }, [matrix]);
 
  
+    const cacularRespuesta =(fila,columna,Respuesta) => {
+      if (columna <= 0){
+        //console.log(matrix[matrix.length-1][matrix[0].length-1])
+        
+        
+        setTextRespuesta(Respuesta)
+      }else{
+        console.log(fila,columna)
+        console.log("aaaaaaaaaaaa")
+        console.log(matrix[fila][columna])
+        var valor = matrix[fila][columna].split("(")[1].split(")")[0]
+        
+        console.log(valor)
+        if (valor != "0"){
+          Respuesta += initialMatrix[columna-1][0]+" = "+ valor + " | "
+          cacularRespuesta(fila - initialMatrix[columna-1][2],columna-1,Respuesta)
+        }else{
+          Respuesta += initialMatrix[columna-1][0]+" = "+ "0" + " | "
+          cacularRespuesta(fila,columna-1,Respuesta)
+        }
+      
+        
+        
+      }
+      
 
+    }
    
     const pasoAlgoritmo = (tipo) => {
       
-      
-      
-      
+      console.log(coordspaso)
+      console.log([matrix.length-1,matrix[0].length-1])
+      console.log(coordspaso[0] == matrix.length-1)
+      console.log(coordspaso[1] == matrix[0].length-1)
+      //if (coordspaso[0] == matrix.length-1 && coordspaso[1] == matrix[0].length-1){}
+      if (coordspaso[1] >= matrix[0].length){
+        toast.success('Algoritmo terminado');
+        console.log("-------------")
+        cacularRespuesta (matrix.length-1,matrix[0].length-1, "Z = "+matrix[matrix.length-1][matrix[0].length-1].split("/")[0] +" | ")
+      }else{      
       var cuantos = 1
       if (tipo === "Columna"){
         cuantos = mayor+3-(coordspaso[0])
@@ -197,8 +245,8 @@ const Proyecto2 = () => {
       var newMatrix = matrix
       var coordspasoAux = coordspaso
       for (let i = 1; i <= cuantos; i++) {
-          console.log(i)
-          console.log(coordspasoAux)
+          //console.log(i)
+          //console.log(coordspasoAux)
 
       
           var valoraatual = parseInt(initialMatrix[coordspasoAux[1]-1][1], 10)
@@ -253,7 +301,7 @@ const Proyecto2 = () => {
         console.log("pasando columna")}
         
       }
-      setCoordspaso(coordspasoAux)
+      setCoordspaso(coordspasoAux)}
       
     } 
 
@@ -264,7 +312,9 @@ const Proyecto2 = () => {
         if(id === 0){
           saveMatrixToLocalStorage(count + 1)
         }
-        
+        setTextRespuesta()
+        setTextRestricciones()
+        setTextfomurlainicial()
         //const D = [...currentMatrix]
         //setMatrix([...matrix, D])
         matrizInicalAlgoritmo()
@@ -355,6 +405,24 @@ const Proyecto2 = () => {
                           />
           </div>
           <div >
+            { textfomurlainicial ? (
+              
+              <div className="row">
+                <div className="col">
+                  <h3>Maximizar:</h3> 
+                  <h5>{textfomurlainicial}</h5>
+                  <h3>Sujeto a: </h3> 
+                  <h5>{textRestricciones}</h5>
+                  <h3>Respuesta:</h3> 
+                  <h5>{textRespuesta}</h5>
+                </div>
+                
+                
+              </div>
+            ) : (<div></div>)}
+            
+          </div>
+          <div >
             { loading ? (
               
               <div className="row">
@@ -412,7 +480,10 @@ const Proyecto2 = () => {
                               <tr key={rowIndex}>
                                  {/* O utiliza rowIndex - 1 si necesitas un índice de fila diferente */}
                                 {row.map((cell, colIndex) => (
-                                  colIndex !== 0 ? ( cell.split("(")[1].split(")")[0] == "0" ?( <td key={colIndex}>{cell}</td>):(<th  style={{ backgroundColor: "green", color: "white" }}>{cell}</th>)): (<th className="table-dark">{cell}</th>)
+                                  colIndex !== 0 ? 
+                                    
+                                  (cell =="0/x=(0)" ? ( <td key={colIndex}>{cell}</td>):(cell.split("(")[1].split(")")[0] == "0" ? ( <td style={{ backgroundColor: "red", color: "white" }} key={colIndex}>{cell}</td>): (<th  style={{ backgroundColor: "green", color: "white" }}>{cell}</th>))):
+                                    (<th className="table-dark">{cell}</th>)
                                 )
                                 )
                                 }
