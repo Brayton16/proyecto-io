@@ -8,14 +8,19 @@ const Proyecto4  = ( ) => {
     const [probabilities, setProbabilities] = useState([]);
     const [tableA, setTableA] = useState([]);
     const [tableR, setTableR] = useState([]);
+    const [historial, setHistorial] = useState([]);
     
 
     // Setea el número de nodos, se asume que siempre n < 10
   const NodeCountChange = (e) => {
-    const count = parseInt(e.target.value);
-    setNodeCount(count);
-    setKeys(Array(count).fill(''));
-    setValues(Array(count).fill(0));
+    try {
+      const count = parseInt(e.target.value);
+      setNodeCount(count);
+      setKeys(Array(count).fill(''));
+      setValues(Array(count).fill(0));
+    } catch (err){
+      //ignora algun nodocount no valido
+    }
   };
 
   // Setea las keys de cada nodo
@@ -32,11 +37,33 @@ const Proyecto4  = ( ) => {
     setValues(newValues);
   };
 
+
+
+
     // Calcula las probabilidades en base a: valorDeKey/valorTotal
   const calculateProbabilities = () => {
     const total = values.reduce((acc, val) => acc + val, 0);    // Calcula costo total del array de valores
     const probs = values.map(val => val / total);   // Calcula costo promedio de cada valor del array
     setProbabilities(probs);    // Aqui los valores ya son todos <1 (Se representan en probabilidades)
+
+    // Guardar en el historial los datos
+    const newHistorial = [
+      ...historial,
+      {
+        nodeCount,
+        keys: [...keys],
+        values: [...values]
+      }
+    ];
+    setHistorial(newHistorial);
+  };
+
+  // Carga datos desde el historial
+  const loadFromHistorial = (entry) => {
+    setNodeCount(entry.nodeCount);
+    setKeys(entry.keys);
+    setValues(entry.values);
+    calculateProbabilities(); // Recalcular probabilidades para cargar los datos seleccionados esde el historial
   };
 
     // Dibuja las filas para ingresar los valores de cada key (nombre y valor)
@@ -128,6 +155,22 @@ const Proyecto4  = ( ) => {
     </div>
   );
 
+    // Función para dibujar el historial
+  const renderHistorial = () => (
+    <div className="mt-4">
+      <h4>Historial</h4>
+      <ul className="list-group">
+        {historial.map((entry, index) => (
+          <li className="list-group-item" key={index}>
+            <div onClick={() => loadFromHistorial(entry)}>
+              Nodos: {entry.nodeCount}, Claves: {entry.keys.join(', ')}, Valores: {entry.values.join(', ')}
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+
     return(
         <div className="container mt-5">
       <h1 className="mb-4">Árbol Binario de Búsqueda Óptimo</h1>
@@ -157,6 +200,7 @@ const Proyecto4  = ( ) => {
           {renderTable(tableR, "Tabla R (Raíces)")}
         </div>
       )}
+      {renderHistorial()}
     </div>
     );
 };
