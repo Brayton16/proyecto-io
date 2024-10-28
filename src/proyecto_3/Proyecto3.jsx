@@ -6,13 +6,18 @@ function Proyecto3() {
   const [ph, setPh] = useState(0.5);
   const [pr, setPr] = useState(0.5);
   const [seriesFormat, setSeriesFormat] = useState(new Array(7).fill('A'));
+  const [probabilities, setProbabilities] = useState([]);
+  const [stepIndex, setStepIndex] = useState(0);
+  const [isComplete, setIsComplete] = useState(false);
 
+  //Numero de juegos que se desea jugar
   const handleNumGamesChange = (e) => {
     const value = Math.min(Math.max(parseInt(e.target.value), 1), 11);
     setNumGames(value);
     setSeriesFormat(new Array(value).fill('A'));
   };
 
+  //Recibe el indice del juego que se quiere modificar
   const handleSeriesFormatChange = (index) => {
     const newFormat = [...seriesFormat];
     newFormat[index] = newFormat[index] === 'A' ? 'B' : 'A';
@@ -20,21 +25,45 @@ function Proyecto3() {
   };
 
   const calculateProbabilities = () => {
-    const probabilities = [];
+    // Validar que las probabilidades esten dentro de 1 o 0
+    if (ph < 0 || ph > 1 || pr < 0 || pr > 1) {
+      alert("Las probabilidades deben estar entre 0 y 1.");
+      return;
+    }
+
+    const allProbabilities = [];
     for (let i = 0; i < numGames; i++) {
       const isHome = seriesFormat[i] === 'A';
       const winProbability = isHome ? ph : pr;
-      probabilities.push({
+      allProbabilities.push({
         game: i + 1,
         homeTeam: seriesFormat[i],
         winProbability: winProbability.toFixed(2),
         loseProbability: (1 - winProbability).toFixed(2),
       });
     }
-    return probabilities;
+
+    //Se asegura que los probalidades esten ordenedas    
+    allProbabilities.sort((a, b) => a.game - b.game);
+    setProbabilities(allProbabilities);
+    setStepIndex(0);
+    setIsComplete(false); 
   };
 
-  const probabilities = calculateProbabilities();
+   //Se muestra la tabla completa de como llegar el ultimo paso
+  const handleNextStep = () => {
+    if (stepIndex < probabilities.length - 1) {
+      setStepIndex(stepIndex + 1);
+    } else {
+      setIsComplete(true);
+    }
+  };
+
+  //Enseña el ultiimo paso de la tabla
+  const handleShowCompleteTable = () => {
+    setIsComplete(true);
+    setStepIndex(probabilities.length - 1); 
+  };
 
   return (
     <div className="container mt-5">
@@ -98,27 +127,77 @@ function Proyecto3() {
         </div>
       </div>
 
-      <h3>Tabla de Probabilidades</h3>
-      <table className="table table-striped table-bordered">
-        <thead className="table-dark">
-          <tr>
-            <th>Juego</th>
-            <th>Equipo Local</th>
-            <th>Probabilidad de Ganar (A)</th>
-            <th>Probabilidad de Perder (A)</th>
-          </tr>
-        </thead>
-        <tbody>
-          {probabilities.map((prob, index) => (
-            <tr key={index}>
-              <td>{prob.game}</td>
-              <td>{prob.homeTeam}</td>
-              <td>{prob.winProbability}</td>
-              <td>{prob.loseProbability}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <button 
+        className="btn btn-success mb-3"
+        onClick={calculateProbabilities}
+      >
+        Iniciar Cálculo
+      </button>
+
+      {probabilities.length > 0 && !isComplete && (
+        <div>
+          <h3>Paso {stepIndex + 1} de {probabilities.length}</h3>
+          <table className="table table-striped table-bordered">
+            <thead className="table-dark">
+              <tr>
+                <th>Juego</th>
+                <th>Equipo Local</th>
+                <th>Probabilidad de Ganar (A)</th>
+                <th>Probabilidad de Perder (A)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>{probabilities[stepIndex].game}</td>
+                <td>{probabilities[stepIndex].homeTeam}</td>
+                <td>{probabilities[stepIndex].winProbability}</td>
+                <td>{probabilities[stepIndex].loseProbability}</td>
+              </tr>
+            </tbody>
+          </table>
+          <button 
+            className="btn btn-primary"
+            onClick={handleNextStep}
+            disabled={stepIndex >= probabilities.length - 1}
+          >
+            Siguiente Paso
+          </button>
+        </div>
+      )}
+
+      {isComplete && (
+        <div>
+          <h3>Tabla Completa de Probabilidades</h3>
+          <table className="table table-striped table-bordered">
+            <thead className="table-dark">
+              <tr>
+                <th>Juego</th>
+                <th>Equipo Local</th>
+                <th>Probabilidad de Ganar (A)</th>
+                <th>Probabilidad de Perder (A)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {probabilities.map((prob, index) => (
+                <tr key={index}>
+                  <td>{prob.game}</td>
+                  <td>{prob.homeTeam}</td>
+                  <td>{prob.winProbability}</td>
+                  <td>{prob.loseProbability}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      <button 
+        className="btn btn-info mt-3"
+        onClick={handleShowCompleteTable}
+        disabled={isComplete}
+      >
+        Mostrar Tabla Completa
+      </button>
     </div>
   );
 }
