@@ -1,35 +1,59 @@
 import React, { useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-//Funcion del proyecto 3 sobre el algoritmo de Series deportivas 
 function Proyecto3() {
-  const [numGames, setNumGames] = useState(4);
+  const [numGames, setNumGames] = useState(5);
   const [pHomeA, setPHomeA] = useState(0.80);  // Probabilidad de que A gane en casa
-  const [pHomeB, setPHomeB] = useState(0.20);  // Probabilidad de que B gane en casa
   const [pAwayA, setPAwayA] = useState(0.75);  // Probabilidad de que A gane de visita
-  const [pAwayB, setPAwayB] = useState(0.25);  // Probabilidad de que B gane de visita
   const [probabilities, setProbabilities] = useState([]);
+  const [alertMessage, setAlertMessage] = useState('');
+  const [winner, setWinner] = useState(''); // Estado para almacenar el equipo ganador
 
+  //Funcion para el rango de jugadas
   const handleNumGamesChange = (e) => {
-    const value = Math.min(Math.max(parseInt(e.target.value), 1), 11);
+    let value = parseInt(e.target.value);
+    value = Math.min(Math.max(value, 1), 101);  //Tiene limite hasta 101, solo por si acaso
     setNumGames(value);
   };
 
-  const calculateProbabilities = () => {
-    const gamesNeededToWin = Math.ceil(numGames / 2);
+  //Funcion que actualiza la probabilidad que el equipo gane en casa 
+  const handlePHomeAChange = (e) => {
+    const value = parseFloat(e.target.value);
+    setPHomeA(value);
+  };
 
-    // Crear tabla de probabilidades
+  //Funcion que actualiza la probabilidad que el equipo gane en visita
+  const handlePAwayAChange = (e) => {
+    const value = parseFloat(e.target.value);
+    setPAwayA(value);
+  };
+
+  //Funcion para bloquear que solo se juegue con juegos impar
+  const calculateProbabilities = () => {
+    if (numGames % 2 === 0) {
+      setAlertMessage('Por favor, selecciona un número impar de juegos.');
+      return;
+    }
+
+    setAlertMessage(''); //Se limpia el mensaje si el número es impar
+    setWinner('');      //Se reiniciar el ganador antes de calcular
+
+    const gamesNeededToWin = Math.ceil(numGames / 2);
+    const pHomeB = 1 - pHomeA;  //Probabilidad de que B gane en casa
+    const pAwayB = 1 - pAwayA;  //Probabilidad de que B gane de visita
+
+    //Se crea tabla de probabilidades
     const tabla = Array.from({ length: gamesNeededToWin + 1 }, () => Array(gamesNeededToWin + 1).fill(0));
 
-    // Inicializar la tabla
-    for (let j = 0; j <= gamesNeededToWin; j++) {
+    //Se va iniciar la tabla
+    for (let j = 1; j <= gamesNeededToWin; j++) {  
       tabla[0][j] = 1;
     }
     for (let i = 1; i <= gamesNeededToWin; i++) {
       tabla[i][0] = 0;
     }
 
-    // Rellenar la tabla usando la fórmula recursiva que se usa en clase
+    //Se rellena la tabla usando la fórmula recursiva
     for (let i = 1; i <= gamesNeededToWin; i++) {
       for (let j = 1; j <= gamesNeededToWin; j++) {
         const p = i + j <= numGames / 2 ? pHomeA : pAwayA;
@@ -39,8 +63,15 @@ function Proyecto3() {
     }
 
     setProbabilities(tabla);
+
+    //Calcular la probabilidad de que A o B gane
+    const winProbabilityA = tabla[gamesNeededToWin][gamesNeededToWin - 1];
+    const winProbabilityB = 1 - winProbabilityA; 
+
+    //Actualizar el equipo ganador basado en las probabilidades
+    setWinner(winProbabilityA > winProbabilityB ? 'A' : 'B');
   };
-  //Parte del BOOTSTRAP
+  //Inicio del BOOTSTRAP
   return (
     <div className="container mt-5">
       <h1 className="text-center mb-4">Series Deportivas</h1>
@@ -58,6 +89,8 @@ function Proyecto3() {
         />
       </div>
 
+      {alertMessage && <div className="alert alert-warning">{alertMessage}</div>}
+
       <div className="row mb-3">
         <h4>Probabilidades de Victoria en Casa y Visita</h4>
         <div className="col-md-6">
@@ -70,7 +103,7 @@ function Proyecto3() {
             min="0" 
             max="1" 
             value={pHomeA} 
-            onChange={(e) => setPHomeA(parseFloat(e.target.value))} 
+            onChange={handlePHomeAChange} 
           />
         </div>
         <div className="col-md-6">
@@ -82,8 +115,8 @@ function Proyecto3() {
             step="0.01" 
             min="0" 
             max="1" 
-            value={pHomeB} 
-            onChange={(e) => setPHomeB(parseFloat(e.target.value))} 
+            value={1 - pHomeA} 
+            disabled 
           />
         </div>
 
@@ -97,7 +130,7 @@ function Proyecto3() {
             min="0" 
             max="1" 
             value={pAwayA} 
-            onChange={(e) => setPAwayA(parseFloat(e.target.value))} 
+            onChange={handlePAwayAChange} 
           />
         </div>
         <div className="col-md-6 mt-3">
@@ -109,8 +142,8 @@ function Proyecto3() {
             step="0.01" 
             min="0" 
             max="1" 
-            value={pAwayB} 
-            onChange={(e) => setPAwayB(parseFloat(e.target.value))} 
+            value={1 - pAwayA} 
+            disabled 
           />
         </div>
       </div>
@@ -139,12 +172,18 @@ function Proyecto3() {
                 <tr key={i}>
                   <td><strong>Gana B = {i} </strong></td>
                   {row.map((prob, j) => (
-                    <td key={j}>{prob.toFixed(4)}</td>
+                    <td key={j}>{i === 0 && j === 0 ? '' : prob.toFixed(4)}</td>
                   ))}
                 </tr>
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {winner && (
+        <div className="alert alert-info">
+          El equipo ganador probable es el equipo {winner}.
         </div>
       )}
     </div>
